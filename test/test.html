@@ -38,15 +38,15 @@
 </head>
 <body>
 <label for="rectangle_width">Rectangle Width:</label>
-<input type="text" id="rectangle_width" value="16"/>
+<input type="text" id="rectangle_width" value="3"/>
 <br/>
 
 <label for="rectangle_height">Rectangle Height:</label>
-<input type="text" id="rectangle_height" value="9"/>
+<input type="text" id="rectangle_height" value="2"/>
 <br/>
 
 <label for="square_count">Square Count:</label>
-<input type="text" id="square_count" value="50"/>
+<input type="text" id="square_count" value="4"/>
 <br/>
 
 <button id="calculate" onclick="run()">Run</button>
@@ -66,7 +66,7 @@
         h = Number(h);
         var n = $("#square_count").val();
         n = Number(n);
-        var result = init(w, h, n);
+        var result = init2(w, h, n);
         var valid_results = result[0];
         var best_fit = result[1];
 
@@ -83,8 +83,11 @@
 
             $("#custom_style").html("");
             var grid_width = $(".grid").width();
-            var real_square_edge = (grid_width * best_fit.square.height) / best_fit.rectangle.width;
-            var grid_height = (grid_width / best_fit.rectangle.width ) * best_fit.rectangle.height;
+            var real_square_edge = (grid_width / best_fit.x);
+            var grid_height = (grid_width / best_fit.rectangle.width) * best_fit.rectangle.height;
+            if (real_square_edge * best_fit.y > grid_height) {
+                real_square_edge = (grid_height / best_fit.y);
+            }
             $("#custom_style").append(".grid .row .square {width:" + real_square_edge + "px; height:" + real_square_edge + "px; }");
             $("#custom_style").append(".grid {height:" + grid_height + "px;}");
         }

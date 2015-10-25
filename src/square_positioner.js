@@ -67,11 +67,30 @@ function find_dividors_of_number(any_number) {
             throw new Error("Number too large");
         } else {
             // happy path :3
-            return listDivisors(any_number);
+            return getFactors(any_number);
         }
     } else {
         throw new Error("Can only find the divisors of number objects!");
     }
+}
+
+/**
+ * Returns list of all divisors
+ * @param integer
+ * @returns {Array}
+ */
+function getFactors(integer) {
+    var factors = [],
+        quotient = 0;
+
+    for (var i = 1; i <= integer; i++) {
+        quotient = integer / i;
+
+        if (quotient === Math.floor(quotient)) {
+            factors.push(i);
+        }
+    }
+    return factors;
 }
 
 /**
@@ -106,47 +125,45 @@ function listDivisors(n) {
  * We will be initialize the environment with a Rectangle and Required number of square count
  */
 
+function check_square_sample(square_sample, the_rectangle, number_of_squares) {
+    if (!Equation_Rectangle(number_of_squares)) {
+        return false;
+    }
+    if (!Equation_Horizontal(the_rectangle, square_sample, N)) {
+        return false;
+    }
+    if (!Equation_Vertical(the_rectangle, square_sample, N)) {
+        return false;
+    }
+    return true;
+}
+
 function init(rectangle_width, rectangle_height, number_of_squares) {
+    console.log("rectangle_width:" + rectangle_width);
+    console.log("rectangle_height:" + rectangle_height);
     var valid_results = [];
     N = number_of_squares;
     var the_rectangle = new Rectangle(rectangle_width, rectangle_height);
     var possible_cases_of_x_and_y = find_dividors_of_number(N);
-
+    console.log("divisors");
+    console.log(possible_cases_of_x_and_y);
     for (var i = 0; i < possible_cases_of_x_and_y.length; i++) {
         x = possible_cases_of_x_and_y[i];
         y = possible_cases_of_x_and_y[(possible_cases_of_x_and_y.length - i - 1)];
-        //console.log("x: "+x +" y:"+y);
+        console.log("x: " + x + " y:" + y);
         var square_sample = new Square(the_rectangle.width / x);
-        if (!Equation_Rectangle(number_of_squares)) {
-            continue;
+
+        if (check_square_sample(square_sample, the_rectangle, number_of_squares)) {
+            valid_results.push({
+                x: x,
+                y: y,
+                square: square_sample,
+                rectangle: the_rectangle
+            });
         }
-        if (!Equation_Horizontal(the_rectangle, square_sample, N)) {
-            continue;
-        }
-        if (!Equation_Vertical(the_rectangle, square_sample, N)) {
-            continue;
-        }
 
-        // if we came here our square object is valid.
-        valid_results.push({
-            x: x,
-            y: y,
-            square: square_sample,
-            rectangle: the_rectangle
-        });
-    }
-
-    // if there is only one possible case of x and y, we have to check
-    // sample square creation with the_rectangle.height / y
-    if (possible_cases_of_x_and_y.length == 1) {
-        x = possible_cases_of_x_and_y[0];
-        y = possible_cases_of_x_and_y[0];
-
-        var square_sample = new Square(the_rectangle.height / x);
-        if (Equation_Rectangle(number_of_squares) &&
-            Equation_Horizontal(the_rectangle, square_sample, N) &&
-            Equation_Vertical(the_rectangle, square_sample, N)) {
-
+        square_sample = new Square(the_rectangle.height / x);
+        if (check_square_sample(square_sample, the_rectangle, number_of_squares)) {
             valid_results.push({
                 x: x,
                 y: y,
@@ -156,16 +173,22 @@ function init(rectangle_width, rectangle_height, number_of_squares) {
         }
     }
 
-
     console.log(valid_results);
 
-    /**
-     * Best fit can be found via the min difference between 'x' and 'y'
-     */
+    var best_fit = null;
+    best_fit = best_fit_by_x_and_y_diff(valid_results);
+    //best_fit = best_fit_by_empty_area_optimization(valid_results);
+    return [valid_results, best_fit];
+}
+
+/**
+ * Best fit can be found via the min difference between 'x' and 'y'
+ */
+function best_fit_by_x_and_y_diff(cases) {
     var best_fit = null;
     var min_diff_between_x_and_y = Number.MAX_VALUE;
-    for (var i = 0; i < valid_results.length; i++) {
-        var valid_result_sample = valid_results[i];
+    for (var i = 0; i < cases.length; i++) {
+        var valid_result_sample = cases[i];
         var diff = Math.abs(valid_result_sample.x - valid_result_sample.y);
         if (diff < min_diff_between_x_and_y) {
             min_diff_between_x_and_y = diff;
@@ -174,6 +197,47 @@ function init(rectangle_width, rectangle_height, number_of_squares) {
     }
     console.log("Best fit:");
     console.log(best_fit);
+    return best_fit;
+}
 
-    return [valid_results, best_fit];
+function best_fit_by_empty_area_optimization(cases) {
+    var best_fit = null;
+    var min_empty_area = Number.MAX_VALUE;
+    for (var i = 0; i < cases.length; i++) {
+        var valid_result_sample = cases[i];
+        var empty_area = (valid_result_sample.rectangle.width * valid_result_sample.rectangle.height)
+            - (valid_result_sample.x * valid_result_sample.y * valid_result_sample.square.height);
+        if (empty_area < min_empty_area) {
+            min_empty_area = empty_area;
+            best_fit = valid_result_sample;
+        }
+    }
+    return best_fit;
+}
+
+function init2(rectangle_width, rectangle_height, number_of_squares) {
+    var row_count = 1;
+    var temp_square_count = 0;
+    var valid_area_results = [];
+    while (row_count == 1) {
+        temp_square_count++;
+        var results = init(rectangle_width, rectangle_height, temp_square_count);
+        var fit = results[1];
+        if (fit != null) {
+            if (fit.y == 1) {
+                valid_area_results.push(fit);
+            }
+            row_count = fit.y;
+        }
+    }
+    // we have to select maximum area result in valid_area_results
+    var max_area_environment = best_fit_by_empty_area_optimization(valid_area_results);
+    var new_environment = init(max_area_environment.square.height * max_area_environment.x, max_area_environment.square.height * max_area_environment.y, number_of_squares);
+    if (new_environment.length == 2 && new_environment[1] != null) {
+        new_environment[1].rectangle.width = rectangle_width;
+        new_environment[1].rectangle.height = rectangle_height;
+    }
+
+
+    return new_environment;
 }
