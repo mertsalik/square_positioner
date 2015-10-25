@@ -13,7 +13,6 @@
             height: auto;
             position: relative;
             float: left;
-            padding: 10px;
         }
 
         .grid .row {
@@ -85,7 +84,9 @@
             $("#custom_style").html("");
             var grid_width = $(".grid").width();
             var real_square_edge = (grid_width * best_fit.square.height) / best_fit.rectangle.width;
-            $("#custom_style").append(".grid .row .square {width:" + real_square_edge + "px; height:" + real_square_edge + "px; }")
+            var grid_height = (grid_width / best_fit.rectangle.width ) * best_fit.rectangle.height;
+            $("#custom_style").append(".grid .row .square {width:" + real_square_edge + "px; height:" + real_square_edge + "px; }");
+            $("#custom_style").append(".grid {height:" + grid_height + "px;}");
         }
     }
 
