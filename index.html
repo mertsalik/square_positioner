@@ -1,1 +1,94 @@
-My Page
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="../src/square_positioner.js"></script>
+    <style>
+
+        .grid {
+            background-color: darkgray;
+            width: 300px;
+            height: auto;
+            position: relative;
+            float: left;
+            padding: 10px;
+        }
+
+        .grid .row {
+            width: auto;
+            height: auto;
+            display: block;
+            text-align: center;
+        }
+
+        .grid .row .square {
+            background-color: darkred;
+            display: inline-block;
+        }
+
+        .grid .row .square:hover {
+            margin: -2px;
+            border: 2px solid #fff;
+        }
+    </style>
+    <style id="custom_style">
+
+    </style>
+</head>
+<body>
+<label for="rectangle_width">Rectangle Width:</label>
+<input type="text" id="rectangle_width" value="16"/>
+<br/>
+
+<label for="rectangle_height">Rectangle Height:</label>
+<input type="text" id="rectangle_height" value="9"/>
+<br/>
+
+<label for="square_count">Square Count:</label>
+<input type="text" id="square_count" value="50"/>
+<br/>
+
+<button id="calculate" onclick="run()">Run</button>
+<br/>
+
+<div class="grid">
+
+</div>
+
+<script type="text/javascript">
+    function run() {
+        $(".grid").html("");
+
+        var w = $("#rectangle_width").val();
+        w = Number(w);
+        var h = $("#rectangle_height").val();
+        h = Number(h);
+        var n = $("#square_count").val();
+        n = Number(n);
+        var result = init(w, h, n);
+        var valid_results = result[0];
+        var best_fit = result[1];
+
+        if (best_fit !== null) {
+            var grid_element = $(".grid");
+            for (var i = 0; i < best_fit.y; i++) {
+                var row_in_grid = $("<div class='row'></div>");
+                for (var j = 0; j < best_fit.x; j++) {
+                    var square_object = $("<div class='square'></div>");
+                    row_in_grid.append(square_object);
+                }
+                grid_element.append(row_in_grid);
+            }
+
+            $("#custom_style").html("");
+            var grid_width = $(".grid").width();
+            var real_square_edge = (grid_width * best_fit.square.height) / best_fit.rectangle.width;
+            $("#custom_style").append(".grid .row .square {width:" + real_square_edge + "px; height:" + real_square_edge + "px; }")
+        }
+    }
+
+</script>
+</body>
+</html>
