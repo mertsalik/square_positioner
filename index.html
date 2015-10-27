@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title></title>
     <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-    <script src="/src/square_positioner.js"></script>
+    <script src="src/square_positioner.js"></script>
     <style>
 
         .grid {
@@ -28,8 +28,13 @@
         }
 
         .grid .row .square:hover {
-            margin: -2px;
-            border: 2px solid #fff;
+            background-color: indianred;
+        }
+
+        .grid .row .square span {
+            display: block;
+            position: relative;
+            margin-top: 10%;
         }
     </style>
     <style id="custom_style">
@@ -72,10 +77,12 @@
 
         if (best_fit !== null) {
             var grid_element = $(".grid");
+            var square_counter = 0;
             for (var i = 0; i < best_fit.y; i++) {
                 var row_in_grid = $("<div class='row'></div>");
                 for (var j = 0; j < best_fit.x; j++) {
-                    var square_object = $("<div class='square'></div>");
+                    square_counter++;
+                    var square_object = $("<div class='square'><span>" + square_counter + "</span></div>");
                     row_in_grid.append(square_object);
                 }
                 grid_element.append(row_in_grid);
@@ -90,6 +97,7 @@
             }
             $("#custom_style").append(".grid .row .square {width:" + real_square_edge + "px; height:" + real_square_edge + "px; }");
             $("#custom_style").append(".grid {height:" + grid_height + "px;}");
+            //$("#custom_style").append(".grid .row .square span {margin-top:" + real_square_edge / 3 + "px;}");
         }
     }
 
