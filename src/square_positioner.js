@@ -147,7 +147,9 @@ function init(rectangle_width, rectangle_height, number_of_squares) {
     for (var i = 0; i < possible_cases_of_x_and_y.length; i++) {
         x = possible_cases_of_x_and_y[i];
         y = possible_cases_of_x_and_y[(possible_cases_of_x_and_y.length - i - 1)];
-
+        if (x == 3 && y == 2 && rectangle_width == 3 && rectangle_height == 2) {
+            var anan = "za";
+        }
         var square_sample = new Square(the_rectangle.width / x);
 
         if (check_square_sample(square_sample, the_rectangle, number_of_squares)) {
@@ -155,7 +157,8 @@ function init(rectangle_width, rectangle_height, number_of_squares) {
                 x: x,
                 y: y,
                 square: square_sample,
-                rectangle: the_rectangle
+                rectangle: the_rectangle,
+                refer: "w"
             });
         }
 
@@ -165,12 +168,13 @@ function init(rectangle_width, rectangle_height, number_of_squares) {
                 x: x,
                 y: y,
                 square: square_sample,
-                rectangle: the_rectangle
+                rectangle: the_rectangle,
+                refer: "h"
             });
         }
     }
 
-    console.log(valid_results);
+    //console.log(valid_results);
 
     var best_fit = null;
     best_fit = best_fit_by_x_and_y_diff(valid_results);
@@ -192,8 +196,8 @@ function best_fit_by_x_and_y_diff(cases) {
             best_fit = valid_result_sample;
         }
     }
-    console.log("Best fit:");
-    console.log(best_fit);
+    //console.log("Best fit:");
+    //console.log(best_fit);
     return best_fit;
 }
 
@@ -202,8 +206,7 @@ function best_fit_by_empty_area_optimization(cases) {
     var min_empty_area = Number.MAX_VALUE;
     for (var i = 0; i < cases.length; i++) {
         var valid_result_sample = cases[i];
-        var empty_area = (valid_result_sample.rectangle.width * valid_result_sample.rectangle.height)
-            - (valid_result_sample.x * valid_result_sample.y * valid_result_sample.square.height);
+        var empty_area = find_empty_area(valid_result_sample);
         if (empty_area < min_empty_area) {
             min_empty_area = empty_area;
             best_fit = valid_result_sample;
@@ -212,16 +215,27 @@ function best_fit_by_empty_area_optimization(cases) {
     return best_fit;
 }
 
+function find_empty_area(environment_objects) {
+    return (environment_objects.rectangle.width * environment_objects.rectangle.height) - ((environment_objects.x * environment_objects.square.height) * (environment_objects.y * environment_objects.square.height));
+}
+
+function max_int(int1, int2) {
+    return int1 >= int2 ? int1 : int2;
+}
+
 function init2(rectangle_width, rectangle_height, number_of_squares) {
     var row_count = 1;
     var temp_square_count = 0;
     var valid_area_results = [];
-    while (row_count == 1) {
+    var _gcd_rectangle_width_and_height = gcd(rectangle_width, rectangle_height);
+    var trial_condition = (max_int(rectangle_height, rectangle_width) / _gcd_rectangle_width_and_height);
+    //console.log("Trial cond: " + trial_condition);
+    while (row_count <= trial_condition) {
         temp_square_count++;
         var results = init(rectangle_width, rectangle_height, temp_square_count);
         var fit = results[1];
         if (fit != null) {
-            if (fit.y == 1) {
+            if (fit.y <= trial_condition) {
                 valid_area_results.push(fit);
             }
             row_count = fit.y;
@@ -229,16 +243,121 @@ function init2(rectangle_width, rectangle_height, number_of_squares) {
     }
     // we have to select maximum area result in valid_area_results
     var max_area_environment = best_fit_by_empty_area_optimization(valid_area_results);
+
     var new_environment = init(max_area_environment.square.height * max_area_environment.x, max_area_environment.square.height * max_area_environment.y, number_of_squares);
     if (new_environment.length == 2 && new_environment[1] != null) {
         new_environment[1].rectangle.width = rectangle_width;
         new_environment[1].rectangle.height = rectangle_height;
     }
 
-
     return new_environment;
+
 }
 
-function init3(rectangle_width, rectangle_height, number_of_squares) {
+function compare_empty_area(obj1, obj2) {
+    if (obj1.empty_area < obj2.empty_area)
+        return -1;
+    if (obj1.empty_area > obj2.empty_area)
+        return 1;
+    return 0;
+}
 
+function compare_square_count(obj1, obj2) {
+    if (obj1.square_count < obj2.square_count)
+        return -1;
+    if (obj1.square_count > obj2.square_count)
+        return 1;
+    return 0;
+}
+
+var gcd = function (a, b) {
+    if (!b) {
+        return a;
+    }
+
+    return gcd(b, a % b);
+};
+
+function sort_best_options(rectangle_width, rectangle_height, number_of_square) {
+    var results = [];
+    number_of_square = number_of_square + 10;
+    for (var i = 1; i <= number_of_square; i++) {
+        var trial = init2(rectangle_width, rectangle_height, i);
+        if (trial.length == 2) {
+            results.push({
+                empty_area: find_empty_area(trial[1]),
+                environment: trial,
+                square_count: i
+            });
+        }
+    }
+    results.sort(compare_empty_area);
+    return results;
+}
+
+
+function recommmand_up_and_down(possible_options, number_of_square_given) {
+    var result = [];
+
+    var actual = null;
+    for (var i = 0; i < possible_options.length; i++) {
+        var opt = possible_options[i];
+        if (opt.square_count == number_of_square_given) {
+            actual = opt;
+        }
+    }
+
+    if (actual.empty_area == 0) {
+        // this option completely fits the rectangle
+        console.log("skipping new recommandations...");
+        return result;
+    }
+
+    var upper_recommandation = null;
+    for (var i = 0; i < possible_options.length; i++) {
+        var opt = possible_options[i];
+        if (opt.square_count > number_of_square_given) {
+            if (opt.empty_area < actual.empty_area) {
+                if (upper_recommandation == null) {
+                    upper_recommandation = opt;
+                } else {
+                    if (opt.empty_area < upper_recommandation.empty_area) {
+                        upper_recommandation = opt;
+                    }
+                }
+            }
+        }
+    }
+    if (upper_recommandation != null) {
+        result.push(upper_recommandation);
+    }
+
+    var lower_recommandation = null;
+    for (var i = 0; i < possible_options.length; i++) {
+        var opt = possible_options[i];
+        if (opt.square_count < number_of_square_given) {
+            if (opt.empty_area < actual.empty_area) {
+                if (lower_recommandation == null) {
+                    lower_recommandation = opt;
+                } else {
+                    if (opt.empty_area < lower_recommandation.empty_area) {
+                        lower_recommandation = opt;
+                    } else if (opt.empty_area == lower_recommandation.empty_area) {
+                        if (opt.square_count > lower_recommandation.square_count) {
+                            lower_recommandation = opt;
+                        } else {
+                            // higher valued lower recommandation is set already
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if (lower_recommandation != null) {
+        result.push(lower_recommandation);
+    }
+
+
+    return result;
 }
