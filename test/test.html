@@ -56,6 +56,8 @@
 
 <button id="calculate" onclick="run()">Run</button>
 <br/>
+<span id="Recommendation"></span>
+<br>
 
 <div class="grid">
 
@@ -72,6 +74,9 @@
         var n = $("#square_count").val();
         n = Number(n);
         var result = init2(w, h, n);
+        console.log("selected env:");
+        console.log(result);
+
         var valid_results = result[0];
         var best_fit = result[1];
 
@@ -98,6 +103,18 @@
             $("#custom_style").append(".grid .row .square {width:" + real_square_edge + "px; height:" + real_square_edge + "px; }");
             $("#custom_style").append(".grid {height:" + grid_height + "px;}");
             //$("#custom_style").append(".grid .row .square span {margin-top:" + real_square_edge / 3 + "px;}");
+        }
+
+        var possible_options = sort_best_options(w, h, n);
+        console.log(possible_options);
+        var recommmanded = recommmand_up_and_down(possible_options, n);
+        if (recommmanded.length == 1) {
+            $("#Recommendation").text("You can try " + recommmanded[0].square_count);
+        } else if (recommmanded.length == 2) {
+            $("#Recommendation").text("You can try " + recommmanded[0].square_count + " or " + recommmanded[1].square_count + " also.");
+        } else {
+            // nothing recommanded
+            $("#Recommendation").text("");
         }
     }
 
