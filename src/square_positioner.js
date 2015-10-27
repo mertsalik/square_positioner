@@ -139,18 +139,15 @@ function check_square_sample(square_sample, the_rectangle, number_of_squares) {
 }
 
 function init(rectangle_width, rectangle_height, number_of_squares) {
-    console.log("rectangle_width:" + rectangle_width);
-    console.log("rectangle_height:" + rectangle_height);
     var valid_results = [];
     N = number_of_squares;
     var the_rectangle = new Rectangle(rectangle_width, rectangle_height);
     var possible_cases_of_x_and_y = find_dividors_of_number(N);
-    console.log("divisors");
-    console.log(possible_cases_of_x_and_y);
+
     for (var i = 0; i < possible_cases_of_x_and_y.length; i++) {
         x = possible_cases_of_x_and_y[i];
         y = possible_cases_of_x_and_y[(possible_cases_of_x_and_y.length - i - 1)];
-        console.log("x: " + x + " y:" + y);
+
         var square_sample = new Square(the_rectangle.width / x);
 
         if (check_square_sample(square_sample, the_rectangle, number_of_squares)) {
@@ -240,4 +237,8 @@ function init2(rectangle_width, rectangle_height, number_of_squares) {
 
 
     return new_environment;
+}
+
+function init3(rectangle_width, rectangle_height, number_of_squares) {
+
 }
