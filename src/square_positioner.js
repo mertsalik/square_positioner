@@ -122,9 +122,12 @@ function listDivisors(n) {
 
 
 /**
- * We will be initialize the environment with a Rectangle and Required number of square count
+ * Validates given square sample and rectangle respectively.
+ * @param square_sample
+ * @param the_rectangle
+ * @param number_of_squares
+ * @returns {boolean}
  */
-
 function check_square_sample(square_sample, the_rectangle, number_of_squares) {
     if (!Equation_Rectangle(number_of_squares)) {
         return false;
@@ -138,6 +141,14 @@ function check_square_sample(square_sample, the_rectangle, number_of_squares) {
     return true;
 }
 
+/**
+ * Generates new environment using the rectangle properties and desired square
+ * count
+ * @param rectangle_width
+ * @param rectangle_height
+ * @param number_of_squares
+ * @returns [[Valid_result(s)], best_of_valid_results ]
+ */
 function init(rectangle_width, rectangle_height, number_of_squares) {
     var valid_results = [];
     N = number_of_squares;
@@ -174,16 +185,17 @@ function init(rectangle_width, rectangle_height, number_of_squares) {
         }
     }
 
-    //console.log(valid_results);
-
-    var best_fit = null;
-    best_fit = best_fit_by_x_and_y_diff(valid_results);
+    var best_fit = best_fit_by_x_and_y_diff(valid_results);
     //best_fit = best_fit_by_empty_area_optimization(valid_results);
     return [valid_results, best_fit];
 }
 
+
 /**
  * Best fit can be found via the min difference between 'x' and 'y'
+ * this method compares all cases using their 'x' and 'y' values.
+ * @param cases
+ * @returns {*}
  */
 function best_fit_by_x_and_y_diff(cases) {
     var best_fit = null;
@@ -201,6 +213,12 @@ function best_fit_by_x_and_y_diff(cases) {
     return best_fit;
 }
 
+/**
+ * Compares all given cases using their empty area sizes, then returns the
+ * valid result that contains minimum empty area
+ * @param cases
+ * @returns {*}
+ */
 function best_fit_by_empty_area_optimization(cases) {
     var best_fit = null;
     var min_empty_area = Number.MAX_VALUE;
@@ -215,14 +233,32 @@ function best_fit_by_empty_area_optimization(cases) {
     return best_fit;
 }
 
+/**
+ * Calculates empty area size, using the environment variables
+ * @param environment_objects
+ * @returns {number}
+ */
 function find_empty_area(environment_objects) {
     return (environment_objects.rectangle.width * environment_objects.rectangle.height) - ((environment_objects.x * environment_objects.square.height) * (environment_objects.y * environment_objects.square.height));
 }
 
+/**
+ * Compares given two integers (numbers) and returns the higher valued one
+ * @param int1
+ * @param int2
+ * @returns {*}
+ */
 function max_int(int1, int2) {
     return int1 >= int2 ? int1 : int2;
 }
 
+/**
+ *
+ * @param rectangle_width
+ * @param rectangle_height
+ * @param number_of_squares
+ * @returns [Valid_results, best_fit_of_valid_results] -> Environment
+ */
 function init2(rectangle_width, rectangle_height, number_of_squares) {
     var row_count = 1;
     var temp_square_count = 0;
@@ -253,7 +289,12 @@ function init2(rectangle_width, rectangle_height, number_of_squares) {
     return new_environment;
 
 }
-
+/**
+ * Compares two objects 'empty_area' properties
+ * @param obj1
+ * @param obj2
+ * @returns {number}
+ */
 function compare_empty_area(obj1, obj2) {
     if (obj1.empty_area < obj2.empty_area)
         return -1;
@@ -262,6 +303,12 @@ function compare_empty_area(obj1, obj2) {
     return 0;
 }
 
+/**
+ * Compares two objects 'square_count' properties
+ * @param obj1
+ * @param obj2
+ * @returns {number}
+ */
 function compare_square_count(obj1, obj2) {
     if (obj1.square_count < obj2.square_count)
         return -1;
@@ -270,6 +317,12 @@ function compare_square_count(obj1, obj2) {
     return 0;
 }
 
+/**
+ * Recursive implementation of Greatest Common Divisor Algorithm
+ * @param a
+ * @param b
+ * @returns {*}
+ */
 var gcd = function (a, b) {
     if (!b) {
         return a;
@@ -278,6 +331,13 @@ var gcd = function (a, b) {
     return gcd(b, a % b);
 };
 
+/**
+ * Sorts validated results using their empty areas
+ * @param rectangle_width
+ * @param rectangle_height
+ * @param number_of_square
+ * @returns {Array}
+ */
 function sort_best_options(rectangle_width, rectangle_height, number_of_square) {
     var results = [];
     number_of_square = number_of_square + 10;
@@ -295,7 +355,12 @@ function sort_best_options(rectangle_width, rectangle_height, number_of_square) 
     return results;
 }
 
-
+/**
+ * Suggests two new square number for better optimized area
+ * @param possible_options
+ * @param number_of_square_given
+ * @returns {Array}
+ */
 function recommmand_up_and_down(possible_options, number_of_square_given) {
     var result = [];
 
